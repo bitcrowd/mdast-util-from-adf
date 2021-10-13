@@ -4,8 +4,12 @@
   "description": "",
   "license": "MIT",
   "author": "",
-  "main": "index.js",
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
+    "build": "tsc",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore --max-warnings 0 .",
     "test": "jest"
   },
