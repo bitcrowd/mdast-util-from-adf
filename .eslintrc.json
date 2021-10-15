@@ -17,6 +17,7 @@
     "eslint:recommended"
   ],
   "rules": {
+    "no-unused-vars": ["error", { "argsIgnorePattern": "^this$" }],
     "prettier/prettier": "error",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error"
