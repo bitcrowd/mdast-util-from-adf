@@ -1,6 +1,3 @@
-Based on: https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa
-
-
 h1. Biggest heading
 h2. Bigger heading
 h3. Big heading
@@ -145,3 +142,11 @@ public String getFoo()
 
 
 \X
+
+
+---
+
+References:
+
+* [https://support.atlassian.com/confluence-cloud/docs/insert-confluence-wiki-markup/]
+* [https://jira.atlassian.com/secure/WikiRendererHelpAction.jspa]
