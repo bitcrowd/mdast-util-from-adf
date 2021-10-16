@@ -1,8 +1,7 @@
+import type { DocNode as AdfRoot } from "@atlaskit/adf-schema";
 import type { Root as MdastRoot } from "mdast";
 
-type Root = any; // TODO: Define ADF types
-
-export default function convert(doc: Root): MdastRoot {
+export default function convert(node: AdfRoot): MdastRoot {
   // TODO: Convert node to `MdastRoot`.
   //
   // Check `unist` utilities for tree traversal and transformation:
