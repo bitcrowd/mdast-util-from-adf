@@ -9,8 +9,8 @@ h6. Smallest heading
 *strong*
 _emphasis_
 ??citation??
--deleted-
-+inserted+
+-strikethrough-
++underline+
 ^superscript^
 ~subscript~
 {{monospaced}}
