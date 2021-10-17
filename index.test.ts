@@ -27,7 +27,7 @@ it("converts simple document", () => {
             },
             {
               type: "text",
-              text: "world",
+              text: "World",
               marks: [
                 {
                   type: "strong",
@@ -39,6 +39,8 @@ it("converts simple document", () => {
       ],
     })
   ).toEqual(
-    u("root", [u("paragraph", [u("text", "Hello "), u("strong", "World")])])
+    u("root", [
+      u("paragraph", [u("text", "Hello "), u("strong", [u("text", "World")])]),
+    ])
   );
 });
