@@ -1,16 +1,42 @@
-import type { DocNode as AdfDoc } from "@atlaskit/adf-schema";
-import type { Content as MdastContent, Root as MdastRoot } from "mdast";
+import type {
+  DocNode as ADFDoc,
+  HeadingDefinition as ADFHeading,
+} from "@atlaskit/adf-schema";
+import type {
+  Content as MDASTContent,
+  Parent as MDASTParent,
+  Root as MDASTRoot,
+} from "mdast";
 
-type AdfNode = { type: string };
+type ADFContent = ADFDoc["content"];
+type ADFNode = ADFContent[number];
+type ADFType = ADFNode["type"];
 
-type StackEntry = [MdastRoot | MdastContent, AdfNode[]];
-type Stack = StackEntry[];
+type MDASTNode = MDASTRoot | MDASTContent;
+type MDASTParents = Extract<MDASTContent, MDASTParent>;
+type MDASTParentNode = MDASTParents & { children: MDASTContent[] };
 
-const blocks: Record<string, (adf: any) => MdastContent> = {
+type StackEntry<Node extends MDASTNode> = [Node, ADFNode[]];
+type Stack = [StackEntry<MDASTRoot>, ...StackEntry<MDASTParentNode>[]];
+
+// const panels = {
+//   info: "ℹ",
+//   note: "",
+//   tip: "",
+//   warning: "⚠",
+//   error: "𐄂",
+//   success: "✔",
+// };
+
+const blocks: Record<ADFType, (_: ADFNode) => MDASTContent> = {
   blockquote: () => ({ type: "blockquote", children: [] }),
   bulletList: () => ({ type: "list", ordered: false, children: [] }),
   codeBlock: () => ({ type: "code", value: "" }),
-  heading: (adf) => ({ type: "heading", depth: adf.attrs.level, children: [] }),
+  heading: (adf) => ({
+    type: "heading",
+    depth: (adf as ADFHeading).attrs.level as 1 | 2 | 3 | 4 | 5 | 6,
+    children: [],
+  }),
   listItem: () => ({ type: "listItem", children: [] }),
   // mediaGroup: () => ({ type: "list", children: [] }),
   // mediaSingle
@@ -25,7 +51,7 @@ const blocks: Record<string, (adf: any) => MdastContent> = {
   table_row: () => ({ type: "tableRow", children: [] }),
 };
 
-const inline: Record<string, (adf: any) => MdastContent> = {
+const inline: Record<string, (_: ADFNode) => MDASTContent> = {
   // emoji
   hardBreak: () => ({ type: "break" }),
   // inlineCard
@@ -35,7 +61,7 @@ const inline: Record<string, (adf: any) => MdastContent> = {
 
 const markings: Record<
   string,
-  (adf: any, mark: { type: string; attrs?: {} }) => MdastContent
+  (adf: ADFNode, mark: { type: string; attrs?: {} }) => MDASTContent
 > = {
   subsup: (node, mark) => ({
     ...node,
@@ -70,10 +96,10 @@ function assert(value: unknown, message = ""): asserts value {
   if (!value) throw new AssertionError(message);
 }
 
-export default function convert(doc: AdfDoc): MdastRoot {
+export default function convert(doc: ADFDoc): MDASTRoot {
   assert(doc.version === 1, "unknown document version");
 
-  const tree: MdastRoot = { type: "root", children: [] };
+  const tree: MDASTRoot = { type: "root", children: [] };
   const stack: Stack = [[tree, doc.content]];
 
   while (stack.length > 0) {
@@ -83,8 +109,7 @@ export default function convert(doc: AdfDoc): MdastRoot {
     if (queue.length === 0) {
       if (index === 0) break; // root node queue is empty, we’re done
       const parent = stack[index - 1][0];
-      assert("children" in parent);
-      parent.children.push(node);
+      parent.children.push(node as MDASTParentNode);
       stack.pop();
       continue;
     }
@@ -92,11 +117,12 @@ export default function convert(doc: AdfDoc): MdastRoot {
     const adf = queue.shift();
     assert(adf);
 
-    if (adf.type in blocks) {
-      const map = blocks[adf.type];
-      stack.push([map(adf), adf.content]);
+    if (adf.type in blocks && "content" in adf) {
+      const mapped = blocks[adf.type](adf);
+      stack.push([mapped, adf.content]);
     } else if (adf.type in inline) {
       const map = inline[adf.type];
+      assert("children" in node);
       node.children.push(map(adf));
     } else {
       throw new Error(`Unknown ADF node type: ${adf.type}`);
