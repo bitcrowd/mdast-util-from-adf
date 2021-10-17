@@ -1,6 +1,11 @@
 import type { DocNode as AdfDoc } from "@atlaskit/adf-schema";
 import type { Content as MdastContent, Root as MdastRoot } from "mdast";
 
+type AdfNode = { type: string };
+
+type StackEntry = [MdastRoot | MdastContent, AdfNode[]];
+type Stack = StackEntry[];
+
 const blocks: Record<string, (adf: any) => MdastContent> = {
   blockquote: () => ({ type: "blockquote", children: [] }),
   bulletList: () => ({ type: "list", ordered: false, children: [] }),
@@ -59,38 +64,42 @@ const mark = (node, marks = []) => {
   return apply.reduce((n, mark) => markings[mark.type](n, mark), node);
 };
 
+class AssertionError extends Error {}
+
+function assert(value: unknown, message = ""): asserts value {
+  if (!value) throw new AssertionError(message);
+}
+
 export default function convert(doc: AdfDoc): MdastRoot {
-  // assert(doc.version === 1)
+  assert(doc.version === 1, "unknown document version");
 
   const tree: MdastRoot = { type: "root", children: [] };
-
-  const stack: [MdastRoot | MdastContent, any[]][] = [[tree, doc.content]];
+  const stack: Stack = [[tree, doc.content]];
 
   while (stack.length > 0) {
-    const [node, queue] = stack[stack.length - 1];
+    const index = stack.length - 1;
+    const [node, queue] = stack[index];
 
     if (queue.length === 0) {
+      if (index === 0) break; // root node queue is empty, we’re done
+      const parent = stack[index - 1][0];
+      assert("children" in parent);
+      parent.children.push(node);
       stack.pop();
-
-      const [parent] = stack[stack.length - 1] || [];
-      if (parent && "children" in parent) parent.children.push(node);
-
       continue;
     }
 
     const adf = queue.shift();
+    assert(adf);
 
-    if (adf.content) {
-      const map = blocks[adf.type as keyof typeof blocks];
+    if (adf.type in blocks) {
+      const map = blocks[adf.type];
       stack.push([map(adf), adf.content]);
-      continue;
-    }
-
-    if ("children" in node) {
-      const map = inline[adf.type as keyof typeof inline];
+    } else if (adf.type in inline) {
+      const map = inline[adf.type];
       node.children.push(map(adf));
-    } else if ("value" in node) {
-      node.value += node.text; // map();
+    } else {
+      throw new Error(`Unknown ADF node type: ${adf.type}`);
     }
   }
 
