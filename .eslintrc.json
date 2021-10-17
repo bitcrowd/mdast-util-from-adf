@@ -17,8 +17,7 @@
     "eslint:recommended"
   ],
   "rules": {
-    "@typescript-eslint/consistent-type-imports": ["error", { "prefer": "type-imports" }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^this$" }],
+    "@typescript-eslint/consistent-type-imports": "error",
     "prettier/prettier": "error",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error"
