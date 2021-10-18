@@ -1,6 +1,15 @@
 import type {
+  BlockContent as ADFBlockContent,
   DocNode as ADFDoc,
   HeadingDefinition as ADFHeading,
+  Inline as ADFInlineContent,
+  LayoutColumnDefinition as ADFLayoutColumn,
+  ListItemDefinition as ADFListItem,
+  MediaDefinition as ADFMedia,
+  TableCellDefinition as ADFTableCell,
+  TableHeaderDefinition as ADFTableHeader,
+  TableRowDefinition as ADFTableRow,
+  TextDefinition as ADFText,
 } from "@atlaskit/adf-schema";
 import type {
   Content as MDASTContent,
@@ -8,8 +17,16 @@ import type {
   Root as MDASTRoot,
 } from "mdast";
 
-type ADFContent = ADFDoc["content"];
-type ADFNode = ADFContent[number];
+type ADFNode =
+  | ADFDoc["content"][number]
+  | ADFBlockContent
+  | ADFInlineContent
+  | ADFLayoutColumn
+  | ADFListItem
+  | ADFMedia
+  | ADFTableCell
+  | ADFTableHeader
+  | ADFTableRow;
 type ADFType = ADFNode["type"];
 
 type MDASTNode = MDASTRoot | MDASTContent;
@@ -28,35 +45,48 @@ type Stack = [StackEntry<MDASTRoot>, ...StackEntry<MDASTParentNode>[]];
 //   success: "✔",
 // };
 
-const blocks: Record<ADFType, (_: ADFNode) => MDASTContent> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars
+const mappings: Record<ADFType, ((_: any) => MDASTContent) | undefined> = {
+  blockCard: undefined,
   blockquote: () => ({ type: "blockquote", children: [] }),
+  bodiedExtension: undefined,
   bulletList: () => ({ type: "list", ordered: false, children: [] }),
   codeBlock: () => ({ type: "code", value: "" }),
-  heading: (adf) => ({
+  date: undefined,
+  decisionList: undefined,
+  embedCard: undefined,
+  emoji: undefined,
+  expand: undefined,
+  extension: undefined,
+  hardBreak: () => ({ type: "break" }),
+  heading: (adf: ADFHeading) => ({
     type: "heading",
-    depth: (adf as ADFHeading).attrs.level as 1 | 2 | 3 | 4 | 5 | 6,
+    depth: adf.attrs.level as 1 | 2 | 3 | 4 | 5 | 6,
     children: [],
   }),
+  inlineCard: undefined,
+  inlineExtension: undefined,
+  layoutColumn: undefined,
+  layoutSection: undefined,
   listItem: () => ({ type: "listItem", children: [] }),
-  // mediaGroup: () => ({ type: "list", children: [] }),
-  // mediaSingle
-  // media
+  media: undefined,
+  mediaGroup: undefined,
+  mediaInline: undefined,
+  mediaSingle: undefined,
+  mention: undefined,
   orderedList: () => ({ type: "list", ordered: true, children: [] }),
-  // panel
+  panel: undefined,
   paragraph: () => ({ type: "paragraph", children: [] }),
+  placeholder: undefined,
   rule: () => ({ type: "thematicBreak" }),
+  status: undefined,
   table: () => ({ type: "table", children: [] }),
-  table_cell: () => ({ type: "tableCell", children: [] }),
-  table_header: () => ({ type: "tableCell", children: [] }),
-  table_row: () => ({ type: "tableRow", children: [] }),
-};
-
-const inline: Record<string, (_: ADFNode) => MDASTContent> = {
-  // emoji
-  hardBreak: () => ({ type: "break" }),
-  // inlineCard
-  // mention
-  text: (adf) => mark({ type: "text", value: adf.text }, adf.marks),
+  tableCell: () => ({ type: "tableCell", children: [] }),
+  tableHeader: () => ({ type: "tableCell", children: [] }),
+  tableRow: () => ({ type: "tableRow", children: [] }),
+  taskList: undefined,
+  text: (adf: ADFText) =>
+    mark({ type: "text", value: adf.text }, adf.marks ?? []),
 };
 
 const markings: Record<
@@ -114,18 +144,18 @@ export default function convert(doc: ADFDoc): MDASTRoot {
       continue;
     }
 
-    const adf = queue.shift();
-    assert(adf);
+    const adf = queue.shift()!;
 
-    if (adf.type in blocks && "content" in adf) {
-      const mapped = blocks[adf.type](adf);
-      stack.push([mapped, adf.content]);
-    } else if (adf.type in inline) {
-      const map = inline[adf.type];
-      assert("children" in node);
-      node.children.push(map(adf));
+    const map = mappings[adf.type];
+    assert(map, "unsupported node type");
+
+    const mapped = map(adf);
+
+    if ("children" in mapped && "content" in adf) {
+      const content = adf.content as Array<ADFNode>;
+      stack.push([mapped, content]);
     } else {
-      throw new Error(`Unknown ADF node type: ${adf.type}`);
+      node.children.push(mapped);
     }
   }
 

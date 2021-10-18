@@ -18,7 +18,7 @@
   ],
   "rules": {
     "@typescript-eslint/consistent-type-imports": "error",
-    "no-unused-vars": ["error", { varsIgnorePattern: "^_" }],
+    "@typescript-eslint/no-non-null-assertion": "off",
     "prettier/prettier": "error",
     "simple-import-sort/imports": "error",
     "simple-import-sort/exports": "error"
