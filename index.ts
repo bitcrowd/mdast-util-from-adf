@@ -40,15 +40,6 @@ type MDASTParentNode = MDASTParents & { children: MDASTContent[] };
 type StackEntry<Node extends MDASTNode> = [Node, ADFNode[]];
 type Stack = [StackEntry<MDASTRoot>, ...StackEntry<MDASTParentNode>[]];
 
-// const panels = {
-//   info: "ℹ",
-//   note: "",
-//   tip: "",
-//   warning: "⚠",
-//   error: "𐄂",
-//   success: "✔",
-// };
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars
 const mappings: Record<ADFType, ((_: any) => MDASTContent) | undefined> = {
   blockCard: undefined,
