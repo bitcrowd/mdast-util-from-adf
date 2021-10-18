@@ -13,10 +13,14 @@ import type {
 } from "@atlaskit/adf-schema";
 import type {
   Content as MDASTContent,
+  Link as MDASTLink,
   Parent as MDASTParent,
+  PhrasingContent as MDASTPhrasingContent,
   Root as MDASTRoot,
 } from "mdast";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ADFMark<Attributes = any> = { type: string; attrs?: Attributes };
 type ADFNode =
   | ADFDoc["content"][number]
   | ADFBlockContent
@@ -89,36 +93,37 @@ const mappings: Record<ADFType, ((_: any) => MDASTContent) | undefined> = {
     mark({ type: "text", value: adf.text }, adf.marks ?? []),
 };
 
-const markings: Record<
-  string,
-  (adf: ADFNode, mark: { type: string; attrs?: {} }) => MDASTContent
-> = {
-  subsup: (node, mark) => ({
-    ...node,
-    type: "html",
-    value: `<${mark.attrs.type}>${node.value}</${mark.attrs.type}>`,
-  }),
-  textColor: (node) => node,
-  underline: (node) => node,
+/* eslint-disable no-unused-vars */
+type Marker = (
+  node: MDASTPhrasingContent,
+  mark: ADFMark
+) => MDASTPhrasingContent;
+/* eslint-enable no-unused-vars */
 
-  code: (node) => ({ ...node, type: "inlineCode" }),
+const markers: Record<string, Marker> = {
+  // markers which change node type - these should be applied first
+  code: (node) => ("value" in node ? { ...node, type: "inlineCode" } : node),
 
+  // markers which wrap the node
   em: (node) => ({ type: "emphasis", children: [node] }),
-  link: (node, mark) => ({
+  link: (node, mark: ADFMark<{ href: string }>) => ({
     type: "link",
-    url: mark.attrs.href,
-    children: [node],
+    url: mark.attrs!.href,
+    children: [node as MDASTLink["children"][number]],
   }),
-  strike: (node) => ({ type: "delete", children: [node] }), // gfm
+  strike: (node) => ({ type: "delete", children: [node] }), // GFM
   strong: (node) => ({ type: "strong", children: [node] }),
 };
 
-const mark = (node, marks = []) => {
-  const order = Object.keys(markings);
-  const apply = [...marks];
-  apply.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
-  return apply.reduce((n, mark) => markings[mark.type](n, mark), node);
-};
+const order = Object.keys(markers);
+
+function mark(node: MDASTPhrasingContent, marks: ADFMark[] = []) {
+  return marks
+    .slice()
+    .filter((m) => order.includes(m.type))
+    .sort((m1, m2) => order.indexOf(m1.type) - order.indexOf(m2.type))
+    .reduce((n, m) => markers[m.type](n, m), node);
+}
 
 class AssertionError extends Error {}
 
