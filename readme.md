@@ -30,7 +30,7 @@ const doc = {
       content: [
         {
           type: "text",
-          text: "Hello "
+          text: "Hello ",
         },
         {
           type: "text",
@@ -39,21 +39,21 @@ const doc = {
             {
               type: "link",
               attrs: {
-                href: "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/"
-              }
+                href: "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/",
+              },
             },
             {
-              type: "strong"
-            }
-          ]
+              type: "strong",
+            },
+          ],
         },
         {
           type: "text",
-          text: "!"
-        }
-      ]
-    }
-  ]
+          text: "!",
+        },
+      ],
+    },
+  ],
 };
 
 console.log(toMarkdown(fromADF(doc)));
