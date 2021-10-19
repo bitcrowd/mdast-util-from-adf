@@ -1,13 +1,16 @@
 {
   "name": "mdast-util-from-adf",
   "version": "1.0.0",
-  "description": "",
+  "description": "Convert from Atlassian Document Format to Markdown Abstract Syntax Tree",
   "license": "MIT",
   "author": "",
   "type": "module",
-  "exports": {
-    ".": "./dist/index.js"
-  },
+  "main": "./dist/index.js",
+  "exports": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore --max-warnings 0 .",
