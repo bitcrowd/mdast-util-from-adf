@@ -1,6 +1,6 @@
 {
   "name": "mdast-util-from-adf",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Convert from Atlassian Document Format to Markdown Abstract Syntax Tree",
   "license": "MIT",
   "author": "",
@@ -14,7 +14,8 @@
   "scripts": {
     "build": "del-cli dist && tsc --project tsconfig.dist.json",
     "lint": "eslint --ext .js,.ts --ignore-path .gitignore --max-warnings 0 .",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "@atlaskit/adf-schema": "^19.2.0",
