@@ -1,5 +1,7 @@
 # mdast-util-from-adf
 
+[![Checks](https://github.com/bitcrowd/mdast-util-from-adf/actions/workflows/checks.yml/badge.svg)](https://github.com/bitcrowd/mdast-util-from-adf/actions/workflows/checks.yml)
+
 [**mdast**](https://github.com/syntax-tree/mdast) utility to convert [ADF](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
 
 ## Install
