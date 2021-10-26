@@ -19,7 +19,6 @@ import type {
   Root as MDASTRoot,
 } from "mdast";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ADFMark<Attributes = any> = { type: string; attrs?: Attributes };
 type ADFNode =
   | ADFDoc["content"][number]
@@ -40,7 +39,6 @@ type MDASTParentNode = MDASTParents & { children: MDASTContent[] };
 type StackEntry<Node extends MDASTNode> = [Node, ADFNode[]];
 type Stack = [StackEntry<MDASTRoot>, ...StackEntry<MDASTParentNode>[]];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, no-unused-vars
 const mappings: Record<ADFType, ((_: any) => MDASTContent) | undefined> = {
   blockCard: undefined,
   blockquote: () => ({ type: "blockquote", children: [] }),
