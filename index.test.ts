@@ -1,23 +1,20 @@
+import type { DocNode as ADFDoc } from "@atlaskit/adf-schema";
 import { u } from "unist-builder";
 
 import convert from ".";
 
+function doc(content: ADFDoc["content"]): ADFDoc {
+  return { version: 1, type: "doc", content };
+}
+
 it("converts empty document", () => {
-  expect(
-    convert({
-      version: 1,
-      type: "doc",
-      content: [],
-    })
-  ).toEqual(u("root", []));
+  expect(convert(doc([]))).toEqual(u("root", []));
 });
 
 it("converts simple document", () => {
   expect(
-    convert({
-      version: 1,
-      type: "doc",
-      content: [
+    convert(
+      doc([
         {
           type: "paragraph",
           content: [
@@ -36,8 +33,8 @@ it("converts simple document", () => {
             },
           ],
         },
-      ],
-    })
+      ])
+    )
   ).toEqual(
     u("root", [
       u("paragraph", [u("text", "Hello "), u("strong", [u("text", "World")])]),
