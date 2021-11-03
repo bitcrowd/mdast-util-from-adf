@@ -10,6 +10,7 @@ import type {
   DocNode as ADFDoc,
   EmbedCardDefinition as ADFEmbedCard,
   EmojiDefinition as ADFEmoji,
+  HardBreakDefinition as ADFHardBreak,
   HeadingBaseDefinition as ADFHeading,
   Inline as ADFInlineContent,
   InlineCardDefinition as ADFInlineCard,
@@ -32,27 +33,20 @@ import type {
   TextDefinition as ADFText,
 } from "@atlaskit/adf-schema";
 import type {
-  Blockquote as MDASTBlockquote,
   Content as MDASTContent,
   Delete as MDASTDelete,
   Emphasis as MDASTEmphasis,
-  Heading as MDASTHeading,
   Link as MDASTLink,
-  List as MDASTList,
   ListItem as MDASTListItem,
   Literal as MDASTLiteral,
   Paragraph as MDASTParagraph,
   Parent as MDASTParent,
   Root as MDASTRoot,
   Strong as MDASTStrong,
-  Table as MDASTTable,
-  TableCell as MDASTTableCell,
-  TableRow as MDASTTableRow,
 } from "mdast";
 import { u } from "unist-builder";
 
 type ADFNode =
-  | ADFDoc["content"][number]
   | ADFBlockCard
   | ADFBlockContent
   | ADFBlockQuote
@@ -63,6 +57,7 @@ type ADFNode =
   | ADFDecisionList
   | ADFEmbedCard
   | ADFEmoji
+  | ADFHardBreak
   | ADFHeading
   | ADFInlineCard
   | ADFInlineContent
@@ -84,174 +79,155 @@ type ADFNode =
   | ADFTaskList
   | ADFText;
 type ADFType = ADFNode["type"];
+type ADFParent = Extract<ADFNode, { content?: Array<ADFNode> }>;
 
-type MDASTNode = MDASTParent | MDASTLiteral;
-type MDASTParents = Extract<MDASTNode, MDASTParent>;
-type MDASTParentNode = MDASTParents & { children: MDASTContent[] };
+type StackEntry<MDASTNode extends MDASTParent> = [ADFNode, MDASTNode][];
+type Stack = [StackEntry<MDASTRoot>, ...StackEntry<MDASTParent>[]];
 
-type StackEntry<Node extends MDASTNode> = [ADFNode, Node][];
-type Stack = [StackEntry<MDASTRoot>, ...StackEntry<MDASTParentNode>[]];
+type Proc<ADF> = (_: ADF, __: MDASTParent) => StackEntry<MDASTParent> | void;
 
-const mappings: Record<
-  ADFType,
-  | ((_: any, __: MDASTParentNode) => StackEntry<MDASTParentNode> | void)
-  | undefined
-> = {
-  blockCard: (adf: ADFBlockCard, parent) => {
-    parent.children.push(
-      u("paragraph", [
-        u(
-          "text",
-          "url" in adf.attrs ? adf.attrs.url : JSON.stringify(adf.attrs.data)
-        ),
-      ])
-    );
-  },
-  blockquote: (adf: ADFBlockQuote, parent) => {
-    const node: MDASTBlockquote = u("blockquote", []);
+// Create a new stack entry for the content of an ADF node, if present.
+function enter<ADF extends { content?: ADFNode[] }>(
+  adf: ADF,
+  parent: MDASTParent
+): StackEntry<MDASTParent> | void {
+  return adf.content?.map((n) => [n, parent]);
+}
+
+// Expand an ADF node into a (linear) MDAST subtree (root-...-leaf).
+// Attach the root of this tree to the parent node and continue
+// processing of ADF content with the leaf as the new parent.
+function expand<ADF extends ADFParent>(
+  transform: (_: ADF) => {
+    root: Extract<MDASTContent, MDASTParent>;
+    leaf: Extract<MDASTContent, MDASTParent>;
+  }
+): Proc<ADF> {
+  return (adf: ADF, parent: MDASTParent) => {
+    const tree = transform(adf);
+    parent.children.push(tree.root);
+    return enter(adf, tree.leaf);
+  };
+}
+
+// Produce an MDAST counterpart for this ADF node.
+// Continue processing branches in the ADF tree.
+function map<ADF extends ADFParent>(
+  transform: (_: ADF) => Extract<MDASTContent, MDASTParent>
+): Proc<ADF> {
+  return (adf: ADF, parent: MDASTParent) => {
+    const node = transform(adf);
     parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
+    return enter(adf, node);
+  };
+}
+
+// Produce an MDAST counterpart for this ADF node.
+// Stop processing on this branch of the ADF tree.
+function put<ADF>(transform: (_: ADF) => MDASTContent): Proc<ADF> {
+  return (adf: ADF, parent: MDASTParent) => {
+    parent.children.push(transform(adf));
+  };
+}
+
+// Do not produce an MDAST counterpart for this ADF node.
+// Instead, continue with processing its content.
+function skip<ADF extends ADFParent>(
+  adf: ADF,
+  parent: MDASTParent
+): StackEntry<MDASTParent> | void {
+  return enter(adf, parent);
+}
+
+const handlers: Record<ADFType, Proc<any> | undefined> = {
+  blockCard: put((adf: ADFBlockCard) => {
+    const { attrs } = adf;
+
+    const content =
+      "url" in attrs
+        ? u("link", { url: attrs.url }, [u("text", attrs.url)])
+        : u("html", `<!-- block card: ${JSON.stringify(attrs.data)} -->`);
+
+    return u("paragraph", [content]);
+  }),
+  blockquote: map(() => u("blockquote", [])),
   bodiedExtension: undefined,
-  bulletList: (adf: ADFBulletList, parent) => {
-    // TODO: Can we share code with ordered list?
-    const node: MDASTList = u("list", { ordered: false, spread: false }, []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  codeBlock: (adf: ADFCodeBlock, parent) => {
-    const value = adf.content?.[0]?.text ?? "";
+  bulletList: map(() => u("list", { ordered: false, spread: false }, [])),
+  codeBlock: put((adf: ADFCodeBlock) => {
+    const text = adf.content?.[0]?.text ?? "";
     const lang = adf.attrs?.language;
-    parent.children.push(u("code", { lang }, value));
-  },
-  date: (adf: ADFDate, parent) => {
-    parent.children.push(u("text", adf.attrs.timestamp));
-  },
-  decisionItem: (adf: ADFDecisionItem, parent) => {
-    // TODO: See whether we can refactor this, task item is similar
-    const paragraph: MDASTParagraph = u("paragraph", []);
-    const node: MDASTListItem = u(
+    return u("code", { lang }, text);
+  }),
+  date: put((adf: ADFDate) => u("text", adf.attrs.timestamp)),
+  decisionItem: expand((adf: ADFDecisionItem) => {
+    const content = u("paragraph", []);
+    const node = u(
       "listItem",
       { spread: false, checked: adf.attrs.state === "DECIDED" },
-      [paragraph]
+      [content]
     );
-    parent.children.push(node);
-    return adf.content?.map((n) => [n, paragraph]);
-  },
-  decisionList: (adf: ADFDecisionList, parent) => {
-    // TODO: See whether we can refactor this, task list is similar
-    const node: MDASTList = u("list", { ordered: false, spread: false }, []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  embedCard: (adf: ADFEmbedCard, parent) => {
+    return { root: node, leaf: content };
+  }),
+  decisionList: map(() => u("list", { ordered: false, spread: false }, [])),
+  embedCard: put((adf: ADFEmbedCard) => {
     const { url } = adf.attrs;
-    const link = u("link", { url }, [u("text", url)]);
-    parent.children.push(link);
-  },
-  emoji: (adf: ADFEmoji, parent) => {
-    parent.children.push(u("text", adf.attrs.text ?? adf.attrs.shortName));
-  },
+    return u("link", { url }, [u("text", url)]);
+  }),
+  emoji: put((adf: ADFEmoji) => {
+    const { shortName, text } = adf.attrs;
+    return u("text", text ?? shortName);
+  }),
   expand: undefined,
   extension: undefined,
-  hardBreak: (adf, parent) => {
-    parent.children.push(u("break"));
-  },
-  heading: (adf: ADFHeading, parent) => {
+  hardBreak: put(() => u("break")),
+  heading: map((adf: ADFHeading) => {
     const depth = adf.attrs.level as 1 | 2 | 3 | 4 | 5 | 6;
-    const node: MDASTHeading = u("heading", { depth }, []);
-    parent.children.push(node);
-    return adf.content?.map((n) => [n, node]);
-  },
-  inlineCard: (adf: ADFInlineCard, parent) => {
-    parent.children.push(
-      u(
-        "text",
-        "url" in adf.attrs ? adf.attrs.url : JSON.stringify(adf.attrs.data)
-      )
-    );
-  },
+    return u("heading", { depth }, []);
+  }),
+  inlineCard: put((adf: ADFInlineCard) => {
+    const { attrs } = adf;
+
+    const node =
+      "url" in attrs
+        ? u("link", { url: attrs.url }, [u("text", attrs.url)])
+        : u("html", `<!-- inline card: ${JSON.stringify(attrs.data)} -->`);
+
+    return node;
+  }),
   inlineExtension: undefined,
-  layoutColumn: (adf: ADFLayoutColumn, parent) => {
-    return adf.content.map((n) => [n, parent]);
-  },
-  layoutSection: (adf: ADFLayoutSection, parent) => {
-    return adf.content.map((n) => [n, parent]);
-  },
-  listItem: (adf: ADFListItem, parent) => {
-    const node: MDASTListItem = u("listItem", { spread: false }, []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  media: (adf: ADFMedia, parent) => {
+  layoutColumn: skip,
+  layoutSection: skip,
+  listItem: map(() => u("listItem", { spread: false }, [])),
+  media: put((adf: ADFMedia) => {
     const key = "url" in adf.attrs ? adf.attrs.url : adf.attrs.id;
-    parent.children.push(u("html", `<!-- media: ${adf.attrs.type} ${key} -->`));
-  },
-  mediaGroup: (adf, parent) => {
-    return adf.content.map((n: ADFMedia) => [n, parent]);
-  },
+    return u("html", `<!-- media: ${adf.attrs.type} ${key} -->`);
+  }),
+  mediaGroup: skip,
   mediaInline: undefined,
-  mediaSingle: (adf, parent) => {
-    return adf.content.map((n: ADFMedia) => [n, parent]);
-  },
-  mention: (adf: ADFMention, parent) => {
-    parent.children.push(u("text", `@${adf.attrs.text}`));
-  },
+  mediaSingle: skip,
+  mention: put((adf: ADFMention) => u("text", `@${adf.attrs.text}`)),
   nestedExpand: undefined,
-  orderedList: (adf: ADFOrderedList, parent) => {
-    const node: MDASTList = u("list", { ordered: true, spread: false }, []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  panel: (adf: ADFPanel, parent) => {
-    return adf.content.map((n) => [n, parent]);
-  },
-  paragraph: (adf: ADFParagraph, parent) => {
-    const node: MDASTParagraph = u("paragraph", []);
-    parent.children.push(node);
-    return adf.content?.map((n) => [n, node]);
-  },
+  orderedList: map(() => u("list", { ordered: true, spread: false }, [])),
+  panel: skip,
+  paragraph: map(() => u("paragraph", [])),
   placeholder: undefined,
-  rule: (adf: ADFRule, parent) => {
-    parent.children.push(u("thematicBreak"));
-  },
+  rule: put(() => u("thematicBreak")),
   status: undefined,
-  table: (adf: ADFTable, parent) => {
-    const node: MDASTTable = u("table", []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  tableCell: (adf: ADFTableCell, parent) => {
-    const node: MDASTTableCell = u("tableCell", []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  tableHeader: (adf: ADFTableHeader, parent) => {
-    const node: MDASTTableCell = u("tableCell", []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  tableRow: (adf: ADFTableRow, parent) => {
-    const node: MDASTTableRow = u("tableRow", []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  taskItem: (adf: ADFTaskItem, parent) => {
-    const paragraph: MDASTParagraph = u("paragraph", []);
+  table: map(() => u("table", [])),
+  tableCell: map(() => u("tableCell", [])),
+  tableHeader: map(() => u("tableCell", [])),
+  tableRow: map(() => u("tableRow", [])),
+  taskItem: expand((adf: ADFTaskItem) => {
+    const content: MDASTParagraph = u("paragraph", []);
     const node: MDASTListItem = u(
       "listItem",
       { spread: false, checked: adf.attrs.state === "DONE" },
-      [paragraph]
+      [content]
     );
-    parent.children.push(node);
-    return adf.content?.map((n) => [n, paragraph]);
-  },
-  taskList: (adf: ADFTaskList, parent) => {
-    const node: MDASTList = u("list", { ordered: false, spread: false }, []);
-    parent.children.push(node);
-    return adf.content.map((n) => [n, node]);
-  },
-  text: (adf: ADFText, parent) => {
+    return { root: node, leaf: content };
+  }),
+  taskList: map(() => u("list", { ordered: false, spread: false }, [])),
+  text: put((adf: ADFText) => {
     const { text, marks = [] } = adf;
 
     const leaf: MDASTLiteral = u("text", adf.text);
@@ -277,8 +253,8 @@ const mappings: Record<
       }
     });
 
-    parent.children.push(node);
-  },
+    return node;
+  }),
 };
 
 class AssertionError extends Error {}
@@ -304,10 +280,10 @@ export default function convert(doc: ADFDoc): MDASTRoot {
 
     const [adf, parent] = queue.shift()!;
 
-    const map = mappings[adf.type];
-    assert(map, `unsupported node type "${adf.type}"`);
+    const proc = handlers[adf.type];
+    assert(proc, `unsupported node type "${adf.type}"`);
 
-    const entry = map(adf, parent);
+    const entry = proc(adf, parent);
 
     if (entry) stack.push(entry);
   }

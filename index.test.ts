@@ -511,7 +511,9 @@ it("converts cards (block)", () => {
         },
       ])
     )
-  ).toEqual(u("root", [u("paragraph", [u("text", url)])]));
+  ).toEqual(
+    u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])])
+  );
 });
 
 it("converts cards (inline)", () => {
@@ -526,7 +528,9 @@ it("converts cards (inline)", () => {
         },
       ])
     )
-  ).toEqual(u("root", [u("paragraph", [u("text", url)])]));
+  ).toEqual(
+    u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])])
+  );
 });
 
 it("converts cards (embed)", () => {
