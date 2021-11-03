@@ -2,9 +2,13 @@ import type {
   DocNode as ADFDoc,
   PanelType as ADFPanelType,
 } from "@atlaskit/adf-schema";
+import Chance from "chance";
 import { u } from "unist-builder";
 
 import convert from ".";
+
+const seed = process.env.SEED;
+const random = seed ? new Chance(seed) : new Chance();
 
 function doc(content: ADFDoc["content"]): ADFDoc {
   return { version: 1, type: "doc", content };
@@ -42,41 +46,42 @@ it("converts simple documents", () => {
   ] as const
 ).forEach(([description, mark, type]) => {
   it(`converts ${description}`, () => {
+    const text = random.word();
+
     expect(
       convert(
         doc([
           {
             type: "paragraph",
             content: [
-              { type: "text", text: "This is " },
-              { type: "text", text: description, marks: [{ type: mark }] },
+              { type: "text", text: "formatted: " },
+              { type: "text", marks: [{ type: mark }], text },
             ],
           },
         ])
       )
     ).toEqual(
       u("root", [
-        u("paragraph", [
-          u("text", "This is "),
-          u(type, [u("text", description)]),
-        ]),
+        u("paragraph", [u("text", "formatted: "), u(type, [u("text", text)])]),
       ])
     );
   });
 });
 
 it("converts strong emphasized text", () => {
+  const text = random.word();
+
   expect(
     convert(
       doc([
         {
           type: "paragraph",
           content: [
-            { type: "text", text: "This is " },
+            { type: "text", text: "strong & emphasized: " },
             {
               type: "text",
-              text: "strong & emphasized",
               marks: [{ type: "em" }, { type: "strong" }],
+              text,
             },
           ],
         },
@@ -85,14 +90,16 @@ it("converts strong emphasized text", () => {
   ).toEqual(
     u("root", [
       u("paragraph", [
-        u("text", "This is "),
-        u("strong", [u("emphasis", [u("text", "strong & emphasized")])]),
+        u("text", "strong & emphasized: "),
+        u("strong", [u("emphasis", [u("text", text)])]),
       ]),
     ])
   );
 });
 
 it("converts inline code", () => {
+  const text = random.hash();
+
   expect(
     convert(
       doc([
@@ -102,17 +109,15 @@ it("converts inline code", () => {
             { type: "text", text: "This is " },
             {
               type: "text",
-              text: "code",
               marks: [{ type: "code" }],
+              text,
             },
           ],
         },
       ])
     )
   ).toEqual(
-    u("root", [
-      u("paragraph", [u("text", "This is "), u("inlineCode", "code")]),
-    ])
+    u("root", [u("paragraph", [u("text", "This is "), u("inlineCode", text)])])
   );
 });
 
@@ -151,7 +156,8 @@ it("converts inline code", () => {
 });
 
 it("converts links", () => {
-  const url = "https://github.com/bitcrowd/mdast-util-from-adf";
+  const text = random.word();
+  const url = random.url();
 
   expect(
     convert(
@@ -161,33 +167,33 @@ it("converts links", () => {
           content: [
             {
               type: "text",
-              text: "GitHub",
               marks: [{ type: "link", attrs: { href: url } }],
+              text,
             },
           ],
         },
       ])
     )
   ).toEqual(
-    u("root", [u("paragraph", [u("link", { url }, [u("text", "GitHub")])])])
+    u("root", [u("paragraph", [u("link", { url }, [u("text", text)])])])
   );
 });
 
 [1, 2, 3, 4, 5, 6].forEach((level) => {
   it(`converts headings (${level})`, () => {
+    const text = random.sentence({ words: 3 });
+
     expect(
       convert(
         doc([
           {
             type: "heading",
             attrs: { level },
-            content: [{ type: "text", text: "Heading" }],
+            content: [{ type: "text", text }],
           },
         ])
       )
-    ).toEqual(
-      u("root", [u("heading", { depth: level }, [u("text", "Heading")])])
-    );
+    ).toEqual(u("root", [u("heading", { depth: level }, [u("text", text)])]));
   });
 });
 
@@ -359,20 +365,18 @@ it("converts lists (decision)", () => {
 });
 
 it("converts block quotes", () => {
-  const quote = "I think; therefore I am.";
+  const text = random.sentence();
 
   expect(
     convert(
       doc([
         {
           type: "blockquote",
-          content: [
-            { type: "paragraph", content: [{ type: "text", text: quote }] },
-          ],
+          content: [{ type: "paragraph", content: [{ type: "text", text }] }],
         },
       ])
     )
-  ).toEqual(u("root", [u("blockquote", [u("paragraph", [u("text", quote)])])]));
+  ).toEqual(u("root", [u("blockquote", [u("paragraph", [u("text", text)])])]));
 });
 
 it("converts dividers", () => {
@@ -423,6 +427,8 @@ it("converts emoji", () => {
 });
 
 it("converts mentions", () => {
+  const name = random.first();
+
   expect(
     convert(
       doc([
@@ -433,7 +439,7 @@ it("converts mentions", () => {
               type: "mention",
               attrs: {
                 id: "557058:aafbc62f-3aa7-444a-8c18-42168d05183d",
-                text: "Alison",
+                text: name,
                 accessLevel: "",
               },
             },
@@ -441,7 +447,7 @@ it("converts mentions", () => {
         },
       ])
     )
-  ).toEqual(u("root", [u("paragraph", [u("text", "@Alison")])]));
+  ).toEqual(u("root", [u("paragraph", [u("text", `@${name}`)])]));
 });
 
 it("converts dates", () => {
@@ -466,6 +472,8 @@ it("converts dates", () => {
   ] as const
 ).forEach(([description, type]) => {
   it(`converts ${description}`, () => {
+    const id = random.guid();
+
     expect(
       convert(
         doc([
@@ -476,7 +484,7 @@ it("converts dates", () => {
               {
                 type: "media",
                 attrs: {
-                  id: "4b3fc7ea-3a65-4dda-8ae4-0c0576a6b9d3",
+                  id,
                   type: "file",
                   collection: "",
                   width: 1632,
@@ -487,25 +495,19 @@ it("converts dates", () => {
           },
         ])
       )
-    ).toEqual(
-      u("root", [
-        u("html", "<!-- media: file 4b3fc7ea-3a65-4dda-8ae4-0c0576a6b9d3 -->"),
-      ])
-    );
+    ).toEqual(u("root", [u("html", `<!-- media: file ${id} -->`)]));
   });
 });
 
 it("converts cards (block)", () => {
-  const url = "https://github.com/bitcrowd/mdast-util-from-adf";
+  const url = random.url();
 
   expect(
     convert(
       doc([
         {
           type: "blockCard",
-          attrs: {
-            url,
-          },
+          attrs: { url },
         },
       ])
     )
@@ -513,7 +515,7 @@ it("converts cards (block)", () => {
 });
 
 it("converts cards (inline)", () => {
-  const url = "https://github.com/bitcrowd/mdast-util-from-adf";
+  const url = random.url();
 
   expect(
     convert(
@@ -528,7 +530,7 @@ it("converts cards (inline)", () => {
 });
 
 it("converts cards (embed)", () => {
-  const url = "https://github.com/bitcrowd/mdast-util-from-adf";
+  const url = random.url();
 
   expect(
     convert(
@@ -545,6 +547,8 @@ it("converts cards (embed)", () => {
 (["info", "note", "success", "warning", "error"] as ADFPanelType[]).forEach(
   (type) => {
     it(`converts panels (${type})`, () => {
+      const text = random.string();
+
       expect(
         convert(
           doc([
@@ -554,18 +558,20 @@ it("converts cards (embed)", () => {
               content: [
                 {
                   type: "paragraph",
-                  content: [{ type: "text", text: "Some panel text" }],
+                  content: [{ type: "text", text }],
                 },
               ],
             },
           ])
         )
-      ).toEqual(u("root", [u("paragraph", [u("text", "Some panel text")])]));
+      ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
     });
   }
 );
 
 it("converts layout containers", () => {
+  const content = random.string();
+
   expect(
     convert(
       doc([
@@ -578,7 +584,7 @@ it("converts layout containers", () => {
               content: [
                 {
                   type: "paragraph",
-                  content: [{ type: "text", text: "Content" }],
+                  content: [{ type: "text", text: content }],
                 },
               ],
             },
@@ -586,5 +592,5 @@ it("converts layout containers", () => {
         },
       ])
     )
-  ).toEqual(u("root", [u("paragraph", [u("text", "Content")])]));
+  ).toEqual(u("root", [u("paragraph", [u("text", content)])]));
 });
