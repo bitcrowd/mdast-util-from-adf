@@ -5,7 +5,7 @@ import type {
 import Chance from "chance";
 import { u } from "unist-builder";
 
-import convert from ".";
+import { fromADF as convert } from ".";
 
 const seed = process.env.SEED;
 const random = seed ? new Chance(seed) : new Chance();

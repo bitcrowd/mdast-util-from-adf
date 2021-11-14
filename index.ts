@@ -263,7 +263,7 @@ function assert(value: unknown, message = ""): asserts value {
   if (!value) throw new AssertionError(message);
 }
 
-export default function convert(doc: ADFDoc): MDASTRoot {
+function convert(doc: ADFDoc): MDASTRoot {
   assert(doc.version === 1, `unknown document version ${doc.version}`);
 
   const tree: MDASTRoot = u("root", []);
@@ -290,3 +290,5 @@ export default function convert(doc: ADFDoc): MDASTRoot {
 
   return tree;
 }
+
+export const fromADF = convert;
