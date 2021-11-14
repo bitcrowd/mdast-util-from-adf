@@ -20,7 +20,7 @@ npm install mdast-util-from-adf
 Say we have the following script, `example.js`:
 
 ```js
-import fromADF from "mdast-util-from-adf";
+import { fromADF } from "mdast-util-from-adf";
 import { toMarkdown } from "mdast-util-to-markdown";
 
 const doc = {
