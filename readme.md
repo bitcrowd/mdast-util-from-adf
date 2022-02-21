@@ -1,6 +1,7 @@
 # mdast-util-from-adf
 
 [![Checks](https://github.com/bitcrowd/mdast-util-from-adf/actions/workflows/checks.yml/badge.svg)](https://github.com/bitcrowd/mdast-util-from-adf/actions/workflows/checks.yml)
+[![npm version](https://img.shields.io/npm/v/mdast-util-from-adf)](https://www.npmjs.com/package/mdast-util-from-adf)
 
 [**mdast**](https://github.com/syntax-tree/mdast) utility to convert [ADF](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
 
