@@ -3,7 +3,12 @@
   "version": "2.0.0",
   "description": "Convert from Atlassian Document Format to Markdown Abstract Syntax Tree",
   "license": "MIT",
-  "author": "",
+  "author": {
+    "name": "bitcrowd GmbH.",
+    "url": "https://bitcrowd.net",
+    "email": "info@bitcrowd.net"
+  },
+  "repository": "github:bitcrowd/mdast-util-from-adf",
   "type": "module",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
