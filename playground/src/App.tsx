@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
-import { render } from "react-dom";
-
 import { Editor, EditorContext, WithEditorActions } from "@atlaskit/editor-core";
+
+export type Props = {};
 
 const defaultValue = {
   version: 1,
@@ -34,31 +34,30 @@ function EditorWrapper({ actions, setValue }) {
   );
 }
 
-function App() {
+function App(_: Props) {
   const [value, setValue] = useState();
 
   return (
-    <div>
-      <div>
+    <div className="flex gap-4 p-4">
+      <div className="flex-1">
         <h2>Editor</h2>
         <EditorContext>
           <WithEditorActions render={(actions) => <EditorWrapper actions={actions} setValue={setValue} />} />
         </EditorContext>
       </div>
-      <div>
+      <div className="flex-1">
         <h2>ADF representation</h2>
-        <pre>
+        <pre className="text-xs p-2 bg-gray-100 border rounded">
           <code>
             {JSON.stringify(value, null, 2)}
           </code>
         </pre>
       </div>
-      <div>
+      <div className="flex-1">
         <h2>Markdown (TODO)</h2>
       </div>
     </div>
   );
 }
 
-const root = document.getElementById("root");
-render(<App />, root);
+export default App;

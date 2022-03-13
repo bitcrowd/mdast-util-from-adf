@@ -2,9 +2,8 @@
   "private": true,
   "name": "playground",
   "version": "1.0.0",
-  "main": "index.js",
   "scripts": {
-    "start": "parcel index.html"
+    "start": "parcel src/index.html"
   },
   "dependencies": {
     "@atlaskit/editor-core": "^162.0.1",
@@ -12,6 +11,9 @@
     "react-dom": "^16.8.0"
   },
   "devDependencies": {
-    "parcel": "^2.3.2"
+    "autoprefixer": "^10.4.2",
+    "parcel": "^2.3.2",
+    "postcss": "^8.4.8",
+    "tailwindcss": "^3.0.23"
   }
 }
