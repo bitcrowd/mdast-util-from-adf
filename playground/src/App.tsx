@@ -1,6 +1,9 @@
 import React, { useCallback, useState } from "react";
 import { Editor, EditorContext, WithEditorActions } from "@atlaskit/editor-core";
 
+import { toMarkdown } from "mdast-util-to-markdown";
+import { fromADF } from "../..";
+
 export type Props = {};
 
 const defaultValue = {
@@ -10,51 +13,87 @@ const defaultValue = {
     {
       type: "paragraph",
       content: [
-        { type: "text", text: "Hello " },
-        { type: "text", text: "World", marks: [{ type: "strong" }] },
-        { type: "text", text: "!" },
+        {
+          type: "text",
+          text: "Hello ",
+        },
+        {
+          type: "text",
+          text: "ADF",
+          marks: [
+            {
+              type: "link",
+              attrs: {
+                href: "https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/",
+              },
+            },
+            {
+              type: "strong",
+            },
+          ],
+        },
+        {
+          type: "text",
+          text: "!",
+        },
       ],
     },
   ],
 };
 
-function EditorWrapper({ actions, setValue }) {
-  const onChange = useCallback(async () => {
+function EditorWrapper({ actions, onChange }) {
+  const update = useCallback(async () => {
     const value = await actions.getValue();
-    // console.log("change", value);
-    setValue(value);
+    onChange(value);
   }, [actions]);
 
   return (
     <Editor
       appearance="comment"
       defaultValue={defaultValue}
-      onChange={onChange}
+      onChange={update}
     />
+  );
+}
+
+function Code({ children }) {
+  return (
+    <pre className="text-xs max-w-full overflow-auto p-2 bg-gray-100 border rounded">
+      <code>
+        {children}
+      </code>
+    </pre>
   );
 }
 
 function App(_: Props) {
   const [value, setValue] = useState();
+  const [markdown, setMarkdown] = useState<string>();
+
+  const onChange = useCallback((value) => {
+    setMarkdown(toMarkdown(fromADF(value)));
+    setValue(value);
+  }, [setMarkdown, setValue]);
 
   return (
-    <div className="flex gap-4 p-4">
-      <div className="flex-1">
+    <div className="grid grid-cols-3 gap-4 p-4">
+      <div>
         <h2>Editor</h2>
         <EditorContext>
-          <WithEditorActions render={(actions) => <EditorWrapper actions={actions} setValue={setValue} />} />
+          <WithEditorActions render={(actions) => <EditorWrapper actions={actions} onChange={onChange} />} />
         </EditorContext>
       </div>
-      <div className="flex-1">
+      <div>
         <h2>ADF representation</h2>
-        <pre className="text-xs p-2 bg-gray-100 border rounded">
-          <code>
-            {JSON.stringify(value, null, 2)}
-          </code>
-        </pre>
+        <Code>
+          {JSON.stringify(value, null, 2)}
+        </Code>
       </div>
-      <div className="flex-1">
-        <h2>Markdown (TODO)</h2>
+      <div>
+        <h2>Markdown</h2>
+        <Code>
+          {markdown}
+        </Code>
       </div>
     </div>
   );
