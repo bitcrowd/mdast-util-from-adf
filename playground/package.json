@@ -3,7 +3,8 @@
   "name": "playground",
   "version": "1.0.0",
   "scripts": {
-    "start": "parcel src/index.html"
+    "start": "parcel serve src/index.html",
+    "build": "parcel build src/index.html"
   },
   "dependencies": {
     "@atlaskit/editor-core": "^162.0.1",
