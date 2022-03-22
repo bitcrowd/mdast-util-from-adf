@@ -1,2 +1,8 @@
-.parcel-cache/
+# Dependency directories
+node_modules/
+
+# Build output
 dist/
+
+# Parcel cache
+.parcel-cache/

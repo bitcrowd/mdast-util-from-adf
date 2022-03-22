@@ -18,7 +18,7 @@ function InternalEditor({ actions, onChange }) {
   );
 }
 
-export type Props = { onChange: (v: any) => void };
+export type Props = { onChange: (_: any) => void };
 
 function EditorWrapper({ onChange }: Props): React.ReactElement {
   return (

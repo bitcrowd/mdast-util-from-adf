@@ -4,7 +4,7 @@ To get started:
 
 ```sh
 # Install dependencies
-npm install
+npm install && (cd .. && npm install)
 
 # Run the development server
 npm start
