@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "del-cli dist && tsc --project tsconfig.dist.json",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --max-warnings 0 .",
+    "lint": "eslint --ext .js,.mjs,.ts --ignore-path .gitignore --max-warnings 0 .",
     "test": "jest",
     "prepare": "npm run build"
   },
