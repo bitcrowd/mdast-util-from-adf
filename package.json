@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "del-cli dist && tsc --project tsconfig.dist.json",
-    "lint": "eslint --ext .js,.ts --ignore-path .gitignore --max-warnings 0 .",
+    "lint": "eslint --ext .js,.mjs,.ts --ignore-path .gitignore --max-warnings 0 .",
     "test": "jest",
     "prepare": "npm run build"
   },
@@ -28,6 +28,7 @@
     "unist-builder": "^3.0.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.17.5",
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-typescript": "^7.15.0",
     "@types/chance": "^1.1.3",
