@@ -1,4 +1,5 @@
 import { toMarkdown } from "mdast-util-to-markdown";
+import { gfmToMarkdown } from "mdast-util-gfm";
 import React, { useCallback, useState } from "react";
 
 import { fromADF } from "../..";
@@ -7,7 +8,7 @@ import Editor from "./Editor";
 import Heading from "./Heading";
 
 function convert(value) {
-  return toMarkdown(fromADF(value));
+  return toMarkdown(fromADF(value), { extensions: [gfmToMarkdown()] });
 }
 
 export type Props = {};
