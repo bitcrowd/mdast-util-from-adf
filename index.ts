@@ -10,6 +10,7 @@ import type {
   DocNode as ADFDoc,
   EmbedCardDefinition as ADFEmbedCard,
   EmojiDefinition as ADFEmoji,
+  ExpandDefinition as ADFExpand,
   HardBreakDefinition as ADFHardBreak,
   HeadingBaseDefinition as ADFHeading,
   Inline as ADFInlineContent,
@@ -57,6 +58,7 @@ type ADFNode =
   | ADFDecisionList
   | ADFEmbedCard
   | ADFEmoji
+  | ADFExpand
   | ADFHardBreak
   | ADFHeading
   | ADFInlineCard
@@ -177,7 +179,7 @@ const handlers: Record<ADFType, Proc<any> | undefined> = {
     const { shortName, text } = adf.attrs;
     return u("text", text ?? shortName);
   }),
-  expand: undefined,
+  expand: skip,
   extension: undefined,
   hardBreak: put(() => u("break")),
   heading: map((adf: ADFHeading) => {
@@ -206,7 +208,7 @@ const handlers: Record<ADFType, Proc<any> | undefined> = {
   mediaInline: undefined,
   mediaSingle: skip,
   mention: put((adf: ADFMention) => u("text", `@${adf.attrs.text}`)),
-  nestedExpand: undefined,
+  nestedExpand: skip,
   orderedList: map(() => u("list", { ordered: true, spread: false }, [])),
   panel: skip,
   paragraph: map(() => u("paragraph", [])),

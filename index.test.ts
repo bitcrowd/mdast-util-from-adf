@@ -598,3 +598,30 @@ it("converts layout containers", () => {
     )
   ).toEqual(u("root", [u("paragraph", [u("text", content)])]));
 });
+
+(
+  [
+    ["expand", "expand"],
+    ["nested expand", "nestedExpand"],
+  ] as const
+).forEach(([description, type]) => {
+  it(`converts ${description}`, () => {
+    const text = random.string();
+
+    expect(
+      convert(
+        doc([
+          {
+            type,
+            content: [
+              {
+                type: "paragraph",
+                content: [{ type: "text", text }],
+              },
+            ],
+          },
+        ])
+      )
+    ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
+  });
+});
