@@ -32,7 +32,7 @@ import type {
   TaskItemDefinition as ADFTaskItem,
   TaskListDefinition as ADFTaskList,
   TextDefinition as ADFText,
-} from "@atlaskit/adf-schema";
+} from "@atlaskit/adf-schema/schema";
 import type {
   Content as MDASTContent,
   Delete as MDASTDelete,
