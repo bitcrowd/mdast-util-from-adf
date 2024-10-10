@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@atlaskit/adf-schema": "^24.0.0",
-    "@types/mdast": "^3.0.0",
+    "@types/mdast": "^4.0.0",
     "unist-builder": "^3.0.0"
   },
   "devDependencies": {
