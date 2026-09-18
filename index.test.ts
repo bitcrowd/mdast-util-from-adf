@@ -5,7 +5,7 @@ import type {
 import Chance from "chance";
 import { u } from "unist-builder";
 
-import { fromADF as convert } from ".";
+import { fromADF as convert } from "./index";
 
 const seed = process.env.SEED;
 const random = seed ? new Chance(seed) : new Chance();
@@ -153,6 +153,31 @@ it("converts inline code", () => {
       ])
     );
   });
+});
+
+it("converts hard breaks", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "Line one" },
+            { type: "hardBreak" },
+            { type: "text", text: "Line two" },
+          ],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [
+      u("paragraph", [
+        u("text", "Line one"),
+        u("break"),
+        u("text", "Line two"),
+      ]),
+    ])
+  );
 });
 
 it("converts links", () => {
@@ -377,6 +402,79 @@ it("converts block quotes", () => {
       ])
     )
   ).toEqual(u("root", [u("blockquote", [u("paragraph", [u("text", text)])])]));
+});
+
+it("converts tables", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "table",
+          content: [
+            {
+              type: "tableRow",
+              content: [
+                {
+                  type: "tableHeader",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Name" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Age" }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "tableRow",
+              content: [
+                {
+                  type: "tableCell",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Ada" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableCell",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "36" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [
+      u("table", [
+        u("tableRow", [
+          u("tableCell", [u("paragraph", [u("text", "Name")])]),
+          u("tableCell", [u("paragraph", [u("text", "Age")])]),
+        ]),
+        u("tableRow", [
+          u("tableCell", [u("paragraph", [u("text", "Ada")])]),
+          u("tableCell", [u("paragraph", [u("text", "36")])]),
+        ]),
+      ]),
+    ])
+  );
 });
 
 it("converts dividers", () => {
