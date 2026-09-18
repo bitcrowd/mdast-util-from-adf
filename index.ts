@@ -261,7 +261,7 @@ const handlers: Record<ADFType, Proc<any> | undefined> = {
 
 class AssertionError extends Error {}
 
-function assert(value: unknown, message = ""): asserts value {
+function assert(value: unknown, message: string): asserts value {
   if (!value) throw new AssertionError(message);
 }
 

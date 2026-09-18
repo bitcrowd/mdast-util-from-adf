@@ -7,8 +7,8 @@ export default {
   collectCoverageFrom: ["index.ts"],
   coverageThreshold: {
     global: {
-      statements: 98,
-      branches: 76,
+      statements: 100,
+      branches: 100,
       functions: 100,
       lines: 100,
     },
