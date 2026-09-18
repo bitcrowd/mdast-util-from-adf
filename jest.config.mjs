@@ -3,4 +3,14 @@
 
 export default {
   transformIgnorePatterns: [],
+  collectCoverage: true,
+  collectCoverageFrom: ["index.ts"],
+  coverageThreshold: {
+    global: {
+      statements: 98,
+      branches: 76,
+      functions: 100,
+      lines: 100,
+    },
+  },
 };
