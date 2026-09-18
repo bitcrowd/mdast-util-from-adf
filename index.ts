@@ -34,7 +34,6 @@ import type {
   TextDefinition as ADFText,
 } from "@atlaskit/adf-schema/schema";
 import type {
-  Content as MDASTContent,
   Delete as MDASTDelete,
   Emphasis as MDASTEmphasis,
   Link as MDASTLink,
@@ -43,11 +42,13 @@ import type {
   Paragraph as MDASTParagraph,
   Parent as MDASTParent,
   Root as MDASTRoot,
+  RootContent as MDASTContent,
   Strong as MDASTStrong,
 } from "mdast";
 import { u } from "unist-builder";
 
 type ADFNode =
+  | ADFDoc["content"][number]
   | ADFBlockCard
   | ADFBlockContent
   | ADFBlockQuote
@@ -141,19 +142,34 @@ function skip<ADF extends ADFParent>(
   return enter(adf, parent);
 }
 
+// Produce an MDAST counterpart for this ADF node.
+// Insert the node before its content, then process the content as siblings.
+function precede<ADF extends ADFParent>(
+  transform: (_: ADF) => MDASTContent
+): Proc<ADF> {
+  return (adf: ADF, parent: MDASTParent) => {
+    parent.children.push(transform(adf));
+    return enter(adf, parent);
+  };
+}
+
 const handlers: Record<ADFType, Proc<any> | undefined> = {
   blockCard: put((adf: ADFBlockCard) => {
     const { attrs } = adf;
 
     const content =
-      "url" in attrs
-        ? u("link", { url: attrs.url }, [u("text", attrs.url)])
-        : u("html", `<!-- block card: ${JSON.stringify(attrs.data)} -->`);
+      "data" in attrs
+        ? u("html", `<!-- block card: ${JSON.stringify(attrs.data)} -->`)
+        : "datasource" in attrs
+        ? u("html", `<!-- block card: ${JSON.stringify(attrs.datasource)} -->`)
+        : u("link", { url: attrs.url }, [u("text", attrs.url)]);
 
     return u("paragraph", [content]);
   }),
   blockquote: map(() => u("blockquote", [])),
   bodiedExtension: undefined,
+  bodiedRule: precede(() => u("thematicBreak")),
+  bodiedSyncBlock: undefined,
   bulletList: map(() => u("list", { ordered: false, spread: false }, [])),
   codeBlock: put((adf: ADFCodeBlock) => {
     const text = adf.content?.[0]?.text ?? "";
@@ -208,6 +224,7 @@ const handlers: Record<ADFType, Proc<any> | undefined> = {
   mediaInline: undefined,
   mediaSingle: skip,
   mention: put((adf: ADFMention) => u("text", `@${adf.attrs.text}`)),
+  multiBodiedExtension: undefined,
   nestedExpand: skip,
   orderedList: map(() => u("list", { ordered: true, spread: false }, [])),
   panel: skip,
@@ -215,6 +232,7 @@ const handlers: Record<ADFType, Proc<any> | undefined> = {
   placeholder: undefined,
   rule: put(() => u("thematicBreak")),
   status: undefined,
+  syncBlock: undefined,
   table: map(() => u("table", [])),
   tableCell: map(() => u("tableCell", [])),
   tableHeader: map(() => u("tableCell", [])),

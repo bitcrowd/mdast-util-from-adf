@@ -523,6 +523,27 @@ it("converts dividers", () => {
   );
 });
 
+it("converts dividers with a caption", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "bodiedRule",
+          attrs: { localId: random.guid() },
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "Section" }],
+            },
+          ],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [u("thematicBreak"), u("paragraph", [u("text", "Section")])])
+  );
+});
+
 it("converts emoji", () => {
   expect(
     convert(
@@ -665,6 +686,22 @@ it("converts cards (block, without a url)", () => {
     u("root", [
       u("paragraph", [
         u("html", `<!-- block card: ${JSON.stringify(data)} -->`),
+      ]),
+    ])
+  );
+});
+
+it("converts cards (block, datasource)", () => {
+  const datasource = {
+    id: random.guid(),
+    parameters: {},
+    views: [{ type: "table" }],
+  };
+
+  expect(convert(doc([{ type: "blockCard", attrs: { datasource } }]))).toEqual(
+    u("root", [
+      u("paragraph", [
+        u("html", `<!-- block card: ${JSON.stringify(datasource)} -->`),
       ]),
     ])
   );
