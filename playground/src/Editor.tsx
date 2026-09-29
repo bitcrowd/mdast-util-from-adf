@@ -5,6 +5,11 @@ import { createDefaultPreset } from "@atlaskit/editor-core/preset-default";
 import { listPlugin } from "@atlaskit/editor-plugins/list";
 import { toolbarListsIndentationPlugin } from "@atlaskit/editor-plugins/toolbar-lists-indentation";
 import { insertBlockPlugin } from "@atlaskit/editor-plugins/insert-block";
+import { rulePlugin } from "@atlaskit/editor-plugins/rule";
+import { contentInsertionPlugin} from "@atlaskit/editor-plugin-content-insertion"
+import { tablePlugin } from "@atlaskit/editor-plugins/table";
+import { emojiPlugin } from "@atlaskit/editor-plugins/emoji";
+import { panelPlugin } from "@atlaskit/editor-plugins/panel";
 
 import example from "./example";
 
@@ -21,7 +26,15 @@ function Editor({ onChange }: Props) {
           showIndentationButtons: true,
         },
       ])
-      .add(insertBlockPlugin);
+      .add([
+        insertBlockPlugin,
+        { horizontalRuleEnabled: true, allowTables: true, allowExpand: true },
+      ])
+      .add(rulePlugin)
+      .add(contentInsertionPlugin)
+      .add(tablePlugin)
+      .add(emojiPlugin)
+      .add(panelPlugin)
   const { preset, editorApi } = usePreset(createPreset);
 
   return (
