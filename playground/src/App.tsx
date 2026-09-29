@@ -10,7 +10,11 @@ import Heading from "./Heading";
 import example from "./example";
 
 function convert(value: DocNode) {
-  return toMarkdown(fromADF(value), { extensions: [gfmToMarkdown()] });
+  try {
+    return toMarkdown(fromADF(value), { extensions: [gfmToMarkdown()] });
+  } catch (error) {
+    return `Error: ${(error as Error).message}`;
+  }
 }
 
 export type Props = never;
