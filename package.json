@@ -25,7 +25,7 @@
   "dependencies": {
     "@atlaskit/adf-schema": "^57.5.3",
     "@types/mdast": "^4.0.0",
-    "unist-builder": "^3.0.0"
+    "unist-builder": "^4.0.0"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.15.8",
