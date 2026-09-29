@@ -5,7 +5,7 @@ import type {
 import Chance from "chance";
 import { u } from "unist-builder";
 
-import { fromADF as convert } from ".";
+import { fromADF as convert } from "./index";
 
 const seed = process.env.SEED;
 const random = seed ? new Chance(seed) : new Chance();
@@ -155,6 +155,31 @@ it("converts inline code", () => {
   });
 });
 
+it("converts hard breaks", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "Line one" },
+            { type: "hardBreak" },
+            { type: "text", text: "Line two" },
+          ],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [
+      u("paragraph", [
+        u("text", "Line one"),
+        u("break"),
+        u("text", "Line two"),
+      ]),
+    ])
+  );
+});
+
 it("converts links", () => {
   const text = random.word();
   const url = random.url();
@@ -177,6 +202,21 @@ it("converts links", () => {
   ).toEqual(
     u("root", [u("paragraph", [u("link", { url }, [u("text", text)])])])
   );
+});
+
+it("ignores unsupported marks", () => {
+  const text = random.word();
+
+  expect(
+    convert(
+      doc([
+        {
+          type: "paragraph",
+          content: [{ type: "text", marks: [{ type: "underline" }], text }],
+        },
+      ])
+    )
+  ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
 });
 
 [1, 2, 3, 4, 5, 6].forEach((level) => {
@@ -224,6 +264,19 @@ it("converts code blocks", () => {
       ),
     ])
   );
+});
+
+it("converts code blocks (without content)", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "codeBlock",
+          attrs: { language: "text" },
+        },
+      ])
+    )
+  ).toEqual(u("root", [u("code", { lang: "text" }, "")]));
 });
 
 (
@@ -379,6 +432,79 @@ it("converts block quotes", () => {
   ).toEqual(u("root", [u("blockquote", [u("paragraph", [u("text", text)])])]));
 });
 
+it("converts tables", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "table",
+          content: [
+            {
+              type: "tableRow",
+              content: [
+                {
+                  type: "tableHeader",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Name" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableHeader",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Age" }],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "tableRow",
+              content: [
+                {
+                  type: "tableCell",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "Ada" }],
+                    },
+                  ],
+                },
+                {
+                  type: "tableCell",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: "36" }],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [
+      u("table", [
+        u("tableRow", [
+          u("tableCell", [u("paragraph", [u("text", "Name")])]),
+          u("tableCell", [u("paragraph", [u("text", "Age")])]),
+        ]),
+        u("tableRow", [
+          u("tableCell", [u("paragraph", [u("text", "Ada")])]),
+          u("tableCell", [u("paragraph", [u("text", "36")])]),
+        ]),
+      ]),
+    ])
+  );
+});
+
 it("converts dividers", () => {
   expect(
     convert(
@@ -394,6 +520,27 @@ it("converts dividers", () => {
       u("thematicBreak"),
       u("paragraph", [u("text", "After")]),
     ])
+  );
+});
+
+it("converts dividers with a caption", () => {
+  expect(
+    convert(
+      doc([
+        {
+          type: "bodiedRule",
+          attrs: { localId: random.guid() },
+          content: [
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: "Section" }],
+            },
+          ],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [u("thematicBreak"), u("paragraph", [u("text", "Section")])])
   );
 });
 
@@ -499,6 +646,22 @@ it("converts dates", () => {
   });
 });
 
+it("converts media (external)", () => {
+  const url = random.url();
+
+  expect(
+    convert(
+      doc([
+        {
+          type: "mediaSingle",
+          attrs: { layout: "center" },
+          content: [{ type: "media", attrs: { type: "external", url } }],
+        },
+      ])
+    )
+  ).toEqual(u("root", [u("html", `<!-- media: external ${url} -->`)]));
+});
+
 it("converts cards (block)", () => {
   const url = random.url();
 
@@ -516,6 +679,34 @@ it("converts cards (block)", () => {
   );
 });
 
+it("converts cards (block, without a url)", () => {
+  const data = { foo: "bar" };
+
+  expect(convert(doc([{ type: "blockCard", attrs: { data } }]))).toEqual(
+    u("root", [
+      u("paragraph", [
+        u("html", `<!-- block card: ${JSON.stringify(data)} -->`),
+      ]),
+    ])
+  );
+});
+
+it("converts cards (block, datasource)", () => {
+  const datasource = {
+    id: random.guid(),
+    parameters: {},
+    views: [{ type: "table" }],
+  };
+
+  expect(convert(doc([{ type: "blockCard", attrs: { datasource } }]))).toEqual(
+    u("root", [
+      u("paragraph", [
+        u("html", `<!-- block card: ${JSON.stringify(datasource)} -->`),
+      ]),
+    ])
+  );
+});
+
 it("converts cards (inline)", () => {
   const url = random.url();
 
@@ -530,6 +721,27 @@ it("converts cards (inline)", () => {
     )
   ).toEqual(
     u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])])
+  );
+});
+
+it("converts cards (inline, without a url)", () => {
+  const data = { foo: "bar" };
+
+  expect(
+    convert(
+      doc([
+        {
+          type: "paragraph",
+          content: [{ type: "inlineCard", attrs: { data } }],
+        },
+      ])
+    )
+  ).toEqual(
+    u("root", [
+      u("paragraph", [
+        u("html", `<!-- inline card: ${JSON.stringify(data)} -->`),
+      ]),
+    ])
   );
 });
 
@@ -624,4 +836,16 @@ it("converts layout containers", () => {
       )
     ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
   });
+});
+
+it("throws on documents with an unsupported version", () => {
+  expect(() =>
+    convert({ version: 2, type: "doc", content: [] } as unknown as ADFDoc)
+  ).toThrow("unknown document version 2");
+});
+
+it("throws on unsupported node types", () => {
+  expect(() =>
+    convert(doc([{ type: "unsupported" } as unknown as ADFDoc["content"][0]]))
+  ).toThrow('unsupported node type "unsupported"');
 });

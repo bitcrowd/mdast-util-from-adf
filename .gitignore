@@ -11,6 +11,9 @@ node_modules/
 # Build output
 dist/
 
+# Test coverage
+coverage/
+
 # Optional REPL history
 .node_repl_history
 
