@@ -29,12 +29,12 @@ it("converts simple documents", () => {
             { type: "text", text: "World", marks: [{ type: "strong" }] },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("paragraph", [u("text", "Hello "), u("strong", [u("text", "World")])]),
-    ])
+    ]),
   );
 });
 
@@ -58,12 +58,12 @@ it("converts simple documents", () => {
               { type: "text", marks: [{ type: mark }], text },
             ],
           },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(
       u("root", [
         u("paragraph", [u("text", "formatted: "), u(type, [u("text", text)])]),
-      ])
+      ]),
     );
   });
 });
@@ -85,15 +85,15 @@ it("converts strong emphasized text", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("paragraph", [
         u("text", "strong & emphasized: "),
         u("strong", [u("emphasis", [u("text", text)])]),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -114,10 +114,10 @@ it("converts inline code", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
-    u("root", [u("paragraph", [u("text", "This is "), u("inlineCode", text)])])
+    u("root", [u("paragraph", [u("text", "This is "), u("inlineCode", text)])]),
   );
 });
 
@@ -145,12 +145,12 @@ it("converts inline code", () => {
               },
             ],
           },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(
       u("root", [
         u("paragraph", [u("text", "x"), u("html", `<${type}>2</${type}>`)]),
-      ])
+      ]),
     );
   });
 });
@@ -167,8 +167,8 @@ it("converts hard breaks", () => {
             { type: "text", text: "Line two" },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("paragraph", [
@@ -176,7 +176,7 @@ it("converts hard breaks", () => {
         u("break"),
         u("text", "Line two"),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -197,10 +197,10 @@ it("converts links", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
-    u("root", [u("paragraph", [u("link", { url }, [u("text", text)])])])
+    u("root", [u("paragraph", [u("link", { url }, [u("text", text)])])]),
   );
 });
 
@@ -214,8 +214,8 @@ it("ignores unsupported marks", () => {
           type: "paragraph",
           content: [{ type: "text", marks: [{ type: "underline" }], text }],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
 });
 
@@ -231,8 +231,8 @@ it("ignores unsupported marks", () => {
             attrs: { level },
             content: [{ type: "text", text }],
           },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(u("root", [u("heading", { depth: level }, [u("text", text)])]));
   });
 });
@@ -253,16 +253,16 @@ it("converts code blocks", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u(
         "code",
         { lang: "typescript" },
-        'import { fromADF } from "mdast-util-from-adf";'
+        'import { fromADF } from "mdast-util-from-adf";',
       ),
-    ])
+    ]),
   );
 });
 
@@ -274,8 +274,8 @@ it("converts code blocks (without content)", () => {
           type: "codeBlock",
           attrs: { language: "text" },
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("code", { lang: "text" }, "")]));
 });
 
@@ -312,8 +312,8 @@ it("converts code blocks (without content)", () => {
               },
             ],
           },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(
       u("root", [
         u("list", { ordered, spread: false }, [
@@ -324,7 +324,7 @@ it("converts code blocks (without content)", () => {
             u("paragraph", [u("text", "two")]),
           ]),
         ]),
-      ])
+      ]),
     );
   });
 });
@@ -357,8 +357,8 @@ it("converts lists (task)", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("list", { ordered: false, spread: false }, [
@@ -369,7 +369,7 @@ it("converts lists (task)", () => {
           u("paragraph", [u("text", "To be done")]),
         ]),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -401,8 +401,8 @@ it("converts lists (decision)", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("list", { ordered: false, spread: false }, [
@@ -413,7 +413,7 @@ it("converts lists (decision)", () => {
           u("paragraph", [u("text", "Undecided")]),
         ]),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -427,8 +427,8 @@ it("converts block quotes", () => {
           type: "blockquote",
           content: [{ type: "paragraph", content: [{ type: "text", text }] }],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("blockquote", [u("paragraph", [u("text", text)])])]));
 });
 
@@ -487,8 +487,8 @@ it("converts tables", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("table", [
@@ -501,7 +501,7 @@ it("converts tables", () => {
           u("tableCell", [u("paragraph", [u("text", "36")])]),
         ]),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -512,14 +512,14 @@ it("converts dividers", () => {
         { type: "paragraph", content: [{ type: "text", text: "Before" }] },
         { type: "rule" },
         { type: "paragraph", content: [{ type: "text", text: "After" }] },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("paragraph", [u("text", "Before")]),
       u("thematicBreak"),
       u("paragraph", [u("text", "After")]),
-    ])
+    ]),
   );
 });
 
@@ -537,10 +537,10 @@ it("converts dividers with a caption", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
-    u("root", [u("thematicBreak"), u("paragraph", [u("text", "Section")])])
+    u("root", [u("thematicBreak"), u("paragraph", [u("text", "Section")])]),
   );
 });
 
@@ -568,8 +568,8 @@ it("converts emoji", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("paragraph", [u("text", "📽"), u("text", ":boom:")])]));
 });
 
@@ -592,8 +592,8 @@ it("converts mentions", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("paragraph", [u("text", `@${name}`)])]));
 });
 
@@ -607,8 +607,8 @@ it("converts dates", () => {
           type: "paragraph",
           content: [{ type: "date", attrs: { timestamp } }],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("paragraph", [u("text", timestamp)])]));
 });
 
@@ -640,8 +640,8 @@ it("converts dates", () => {
               },
             ],
           },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(u("root", [u("html", `<!-- media: file ${id} -->`)]));
   });
 });
@@ -657,8 +657,8 @@ it("converts media (external)", () => {
           attrs: { layout: "center" },
           content: [{ type: "media", attrs: { type: "external", url } }],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("html", `<!-- media: external ${url} -->`)]));
 });
 
@@ -672,10 +672,10 @@ it("converts cards (block)", () => {
           type: "blockCard",
           attrs: { url },
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
-    u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])])
+    u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])]),
   );
 });
 
@@ -687,7 +687,7 @@ it("converts cards (block, without a url)", () => {
       u("paragraph", [
         u("html", `<!-- block card: ${JSON.stringify(data)} -->`),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -703,7 +703,7 @@ it("converts cards (block, datasource)", () => {
       u("paragraph", [
         u("html", `<!-- block card: ${JSON.stringify(datasource)} -->`),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -717,10 +717,10 @@ it("converts cards (inline)", () => {
           type: "paragraph",
           content: [{ type: "inlineCard", attrs: { url } }],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
-    u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])])
+    u("root", [u("paragraph", [u("link", { url }, [u("text", url)])])]),
   );
 });
 
@@ -734,14 +734,14 @@ it("converts cards (inline, without a url)", () => {
           type: "paragraph",
           content: [{ type: "inlineCard", attrs: { data } }],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(
     u("root", [
       u("paragraph", [
         u("html", `<!-- inline card: ${JSON.stringify(data)} -->`),
       ]),
-    ])
+    ]),
   );
 });
 
@@ -755,8 +755,8 @@ it("converts cards (embed)", () => {
           type: "embedCard",
           attrs: { layout: "center", url },
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("link", { url }, [u("text", url)])]));
 });
 
@@ -778,11 +778,11 @@ it("converts cards (embed)", () => {
                 },
               ],
             },
-          ])
-        )
+          ]),
+        ),
       ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
     });
-  }
+  },
 );
 
 it("converts layout containers", () => {
@@ -806,8 +806,8 @@ it("converts layout containers", () => {
             },
           ],
         },
-      ])
-    )
+      ]),
+    ),
   ).toEqual(u("root", [u("paragraph", [u("text", content)])]));
 });
 
@@ -832,20 +832,20 @@ it("converts layout containers", () => {
               },
             ],
           },
-        ])
-      )
+        ]),
+      ),
     ).toEqual(u("root", [u("paragraph", [u("text", text)])]));
   });
 });
 
 it("throws on documents with an unsupported version", () => {
   expect(() =>
-    convert({ version: 2, type: "doc", content: [] } as unknown as ADFDoc)
+    convert({ version: 2, type: "doc", content: [] } as unknown as ADFDoc),
   ).toThrow("unknown document version 2");
 });
 
 it("throws on unsupported node types", () => {
   expect(() =>
-    convert(doc([{ type: "unsupported" } as unknown as ADFDoc["content"][0]]))
+    convert(doc([{ type: "unsupported" } as unknown as ADFDoc["content"][0]])),
   ).toThrow('unsupported node type "unsupported"');
 });

@@ -1,48 +1,38 @@
 import js from "@eslint/js";
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import typescriptParser from "@typescript-eslint/parser";
-import prettierConfig from "eslint-config-prettier";
-import prettier from "eslint-plugin-prettier";
+import { defineConfig, globalIgnores } from "eslint/config";
+import prettierRecommended from "eslint-plugin-prettier/recommended";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import globals from "globals";
+import tseslint from "typescript-eslint";
 
-export default [
-  {
-    ignores: ["dist/", "coverage/"],
-  },
+export default defineConfig([
+  globalIgnores(["dist/", "coverage/"]),
   {
     files: ["**/*.ts"],
   },
+  js.configs.recommended,
+  tseslint.configs.recommended,
+  prettierRecommended,
   {
     languageOptions: {
-      parser: typescriptParser,
       globals: {
         ...globals.jest,
         ...globals.node,
       },
     },
     plugins: {
-      "@typescript-eslint": typescriptEslint,
-      prettier,
       "simple-import-sort": simpleImportSort,
     },
-    rules: {
-      ...typescriptEslint.configs["eslint-recommended"].overrides[0].rules,
-      ...typescriptEslint.configs.recommended.rules,
-      ...prettierConfig.rules,
-      ...prettier.configs.recommended.rules,
-      ...js.configs.recommended.rules,
-    },
-  },
-  {
     rules: {
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
-      "prettier/prettier": "error",
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
     },
   },
-];
+]);
