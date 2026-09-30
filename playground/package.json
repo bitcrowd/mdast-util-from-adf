@@ -6,7 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "lint:js": "eslint .",
+    "lint:md": "prettier --check '**/*.md'",
+    "lint": "npm run lint:js && npm run lint:md",
+    "format:js": "eslint --fix .",
+    "format:md": "prettier --write '**/*.md'",
+    "format": "npm run format:js && npm run format:md",
     "preview": "vite preview"
   },
   "dependencies": {

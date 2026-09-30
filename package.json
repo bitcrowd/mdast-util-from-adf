@@ -18,7 +18,12 @@
   ],
   "scripts": {
     "build": "del-cli dist && tsc --project tsconfig.dist.json",
-    "lint": "eslint --max-warnings 0 .",
+    "lint:js": "eslint --max-warnings 0 .",
+    "lint:md": "prettier --check '**/*.md'",
+    "lint": "npm run lint:js && npm run lint:md",
+    "format:js": "eslint --max-warnings 0 --fix .",
+    "format:md": "prettier --write '**/*.md'",
+    "format": "npm run format:js && npm run format:md",
     "test": "jest",
     "prepare": "npm run build"
   },
