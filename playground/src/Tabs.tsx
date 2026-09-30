@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { type ReactNode, useState } from "react";
 
 export type Tab = { label: string; content: ReactNode };
@@ -19,11 +20,12 @@ function Tabs<K extends string>({ tabs, labelledby }: Props<K>) {
             key={key}
             role="tab"
             aria-selected={key === active}
-            className={`border px-4 py-1.5 text-sm ${
+            className={clsx(
+              "border px-4 py-1.5 text-sm",
               key === active
                 ? "rounded-t border-gray-300 border-b-white"
-                : "border-transparent"
-            }`}
+                : "border-transparent",
+            )}
             onClick={() => setActive(key)}
           >
             {tabs[key].label}
@@ -32,7 +34,10 @@ function Tabs<K extends string>({ tabs, labelledby }: Props<K>) {
       </div>
       <div
         role="tabpanel"
-        className={`-mt-px rounded-tr rounded-b border border-gray-300 p-2 ${active == firstKey ? "" : "rounded-tl"}`}
+        className={clsx(
+          "-mt-px rounded-tr rounded-b border border-gray-300 p-2",
+          active == firstKey ? "" : "rounded-tl",
+        )}
       >
         {tabs[active].content}
       </div>
