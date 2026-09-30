@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { fromADF } from "../..";
 import Code from "./Code";
 import Editor from "./Editor";
+import JsonEditor from "./JsonEditor";
 import Heading from "./Heading";
 import example from "./example";
 
@@ -18,8 +19,12 @@ function convert(value: DocNode) {
 }
 
 export type Props = never;
+const modes = { rich: "Rich Text", json: "ADF JSON" };
+const firstMode = (Object.keys(modes) as Mode[])[0];
+type Mode = keyof typeof modes;
 
 function App() {
+  const [mode, setMode] = useState<Mode>("rich");
   const [value, setValue] = useState<DocNode>(example);
   const markdown = useMemo(() => convert(value), [value]);
 
@@ -32,14 +37,42 @@ function App() {
           <a
             className="text-blue-600 hover:underline"
             href="https://github.com/bitcrowd/mdast-util-from-adf"
-          >Code on GitHub</a>
+          >
+            Code on GitHub
+          </a>
           ).
         </p>
       </header>
       <main className="grid grid-cols-3 gap-4 p-4">
         <section>
-          <Heading>Editor</Heading>
-          <Editor onChange={setValue} />
+          <Heading>Input</Heading>
+          <div
+            role="tablist"
+            aria-label="Input"
+            className="flex gap-2"
+          >
+            {(Object.keys(modes) as Mode[]).map((tab) => (
+              <button
+                key={tab}
+                role="tab"
+                aria-selected={mode === tab}
+                className={`px-4 py-1.5 text-sm border ${mode === tab
+                    ? "rounded-t border-gray-300 border-b-white"
+                    : "border-transparent"
+                  }`}
+                onClick={() => setMode(tab)}
+              >
+                {modes[tab]}
+              </button>
+            ))}
+          </div>
+          <div
+            role="tabpanel"
+            className={`-mt-px rounded-tr rounded-b border border-gray-300 p-2 ${mode == firstMode ? "" : "rounded-tl"}`}
+          >
+            {mode === "rich" && <Editor value={value} onChange={setValue} />}
+            {mode === "json" && <JsonEditor value={value} onChange={setValue} />}
+          </div>
         </section>
         <section>
           <Heading>ADF</Heading>

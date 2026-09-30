@@ -11,11 +11,9 @@ import { tablePlugin } from "@atlaskit/editor-plugins/table";
 import { emojiPlugin } from "@atlaskit/editor-plugins/emoji";
 import { panelPlugin } from "@atlaskit/editor-plugins/panel";
 
-import example from "./example";
+export type Props = { value: DocNode, onChange: (doc: DocNode) => void };
 
-export type Props = { onChange: (doc: DocNode) => void };
-
-function Editor({ onChange }: Props) {
+function Editor({ value, onChange }: Props) {
   const createPreset = () =>
     createDefaultPreset({ featureFlags: {}, paste: {} })
       .add(listPlugin)
@@ -41,7 +39,7 @@ function Editor({ onChange }: Props) {
     <ComposableEditor
       preset={preset}
       appearance="comment"
-      defaultValue={example}
+      defaultValue={value}
       onChange={() =>
         editorApi?.core.actions.requestDocument((doc) => {
           if (doc) onChange(doc as DocNode);
