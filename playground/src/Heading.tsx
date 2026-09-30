@@ -1,9 +1,9 @@
-import React from "react";
+import React, { type ComponentProps } from "react";
 
-export type Props = { children: React.ReactNode };
+export type Props = ComponentProps<"h2">;
 
-function Heading({ children }: Props): React.ReactElement {
-  return <h2 className="font-bold mb-2">{children}</h2>;
+function Heading(props: Props): React.ReactElement {
+  return <h2 className="font-bold mb-2" {...props}/>;
 }
 
 export default Heading;
