@@ -24,20 +24,33 @@ function App() {
   const markdown = useMemo(() => convert(value), [value]);
 
   return (
-    <div className="grid grid-cols-3 gap-4 p-4">
-      <div>
-        <Heading>Editor</Heading>
-        <Editor onChange={setValue} />
-      </div>
-      <div>
-        <Heading>ADF</Heading>
-        <Code>{JSON.stringify(value, null, 2)}</Code>
-      </div>
-      <div>
-        <Heading>Markdown</Heading>
-        <Code>{markdown}</Code>
-      </div>
-    </div>
+    <>
+      <header className="p-4">
+        <h1 className="text-xl font-bold">mdast-util-from-adf Playground</h1>
+        <p className="text-sm text-gray-600">
+          Convert Atlassian Document Format (ADF) to Markdown (
+          <a
+            className="text-blue-600 hover:underline"
+            href="https://github.com/bitcrowd/mdast-util-from-adf"
+          >Code on GitHub</a>
+          ).
+        </p>
+      </header>
+      <main className="grid grid-cols-3 gap-4 p-4">
+        <section>
+          <Heading>Editor</Heading>
+          <Editor onChange={setValue} />
+        </section>
+        <section>
+          <Heading>ADF</Heading>
+          <Code>{JSON.stringify(value, null, 2)}</Code>
+        </section>
+        <section>
+          <Heading>Markdown</Heading>
+          <Code>{markdown}</Code>
+        </section>
+      </main>
+    </>
   );
 }
 
