@@ -19,7 +19,7 @@ function Tabs<K extends string>({ tabs, labelledby }: Props<K>) {
             key={key}
             role="tab"
             aria-selected={key === active}
-            className={`px-4 py-1.5 text-sm border ${
+            className={`border px-4 py-1.5 text-sm ${
               key === active
                 ? "rounded-t border-gray-300 border-b-white"
                 : "border-transparent"
