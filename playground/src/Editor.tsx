@@ -1,17 +1,17 @@
 import type { DocNode } from "@atlaskit/adf-schema";
 import { ComposableEditor } from "@atlaskit/editor-core/composable-editor";
-import { usePreset } from "@atlaskit/editor-core/use-preset";
 import { createDefaultPreset } from "@atlaskit/editor-core/preset-default";
-import { listPlugin } from "@atlaskit/editor-plugins/list";
-import { toolbarListsIndentationPlugin } from "@atlaskit/editor-plugins/toolbar-lists-indentation";
-import { insertBlockPlugin } from "@atlaskit/editor-plugins/insert-block";
-import { rulePlugin } from "@atlaskit/editor-plugins/rule";
-import { contentInsertionPlugin} from "@atlaskit/editor-plugin-content-insertion"
-import { tablePlugin } from "@atlaskit/editor-plugins/table";
+import { usePreset } from "@atlaskit/editor-core/use-preset";
+import { contentInsertionPlugin } from "@atlaskit/editor-plugin-content-insertion";
 import { emojiPlugin } from "@atlaskit/editor-plugins/emoji";
+import { insertBlockPlugin } from "@atlaskit/editor-plugins/insert-block";
+import { listPlugin } from "@atlaskit/editor-plugins/list";
 import { panelPlugin } from "@atlaskit/editor-plugins/panel";
+import { rulePlugin } from "@atlaskit/editor-plugins/rule";
+import { tablePlugin } from "@atlaskit/editor-plugins/table";
+import { toolbarListsIndentationPlugin } from "@atlaskit/editor-plugins/toolbar-lists-indentation";
 
-export type Props = { value: DocNode, onChange: (doc: DocNode) => void };
+export type Props = { value: DocNode; onChange: (doc: DocNode) => void };
 
 function Editor({ value, onChange }: Props) {
   const createPreset = () =>
@@ -32,7 +32,7 @@ function Editor({ value, onChange }: Props) {
       .add(contentInsertionPlugin)
       .add(tablePlugin)
       .add(emojiPlugin)
-      .add(panelPlugin)
+      .add(panelPlugin);
   const { preset, editorApi } = usePreset(createPreset);
 
   return (

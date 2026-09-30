@@ -6,10 +6,10 @@ import { useMemo, useState } from "react";
 import { fromADF } from "../..";
 import Code from "./Code";
 import Editor from "./Editor";
-import JsonEditor from "./JsonEditor";
-import Heading from "./Heading";
-import Tabs from "./Tabs";
 import example from "./example";
+import Heading from "./Heading";
+import JsonEditor from "./JsonEditor";
+import Tabs from "./Tabs";
 
 function convert(value: DocNode) {
   try {

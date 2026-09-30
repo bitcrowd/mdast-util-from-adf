@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 
 export type Tab = { label: string; content: ReactNode };
 export type Props<K extends string> = {
@@ -19,10 +19,11 @@ function Tabs<K extends string>({ tabs, labelledby }: Props<K>) {
             key={key}
             role="tab"
             aria-selected={key === active}
-            className={`px-4 py-1.5 text-sm border ${key === active
+            className={`px-4 py-1.5 text-sm border ${
+              key === active
                 ? "rounded-t border-gray-300 border-b-white"
                 : "border-transparent"
-              }`}
+            }`}
             onClick={() => setActive(key)}
           >
             {tabs[key].label}
