@@ -1,6 +1,6 @@
 {
   "name": "mdast-util-from-adf",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Convert from Atlassian Document Format to Markdown Abstract Syntax Tree",
   "license": "MIT",
   "author": {
