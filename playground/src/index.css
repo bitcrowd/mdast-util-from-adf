@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.assistive {
+  @apply sr-only;
+}
+
+.ProseMirror hr {
+  box-sizing: content-box;
+}
