@@ -5,6 +5,8 @@
 
 [**mdast**](https://github.com/syntax-tree/mdast) utility to convert [ADF](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/).
 
+Check out the interactive [playground](https://bitcrowd.github.io/mdast-util-from-adf/)!
+
 ## Install
 
 This package is [ESM only](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c):

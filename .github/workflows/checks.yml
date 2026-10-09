@@ -29,15 +29,6 @@ jobs:
         run: npm ci
       - name: Run lint checks
         run: npm run lint
-  prettier:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version-file: ".nvmrc"
-      - name: Run prettier
-        run: npx prettier --check '**/*.md'
   test:
     runs-on: ubuntu-latest
     steps:

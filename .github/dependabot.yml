@@ -43,3 +43,47 @@ updates:
         update-types:
           - minor
           - patch
+
+  - package-ecosystem: "npm"
+    directory: "/playground"
+    schedule:
+      interval: "monthly"
+    ignore:
+      # @atlaskit/media-core only supports React 18…
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/react*"
+        update-types: ["version-update:semver-major"]
+      # react-intl (via Atlaskit) only supports TypeScript 5…
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+    groups:
+      atlaskit:
+        patterns:
+          - "@atlaskit/*"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+      typescript-eslint:
+        patterns:
+          - "typescript-eslint"
+          - "@typescript-eslint/*"
+      production-dependencies:
+        applies-to: version-updates
+        dependency-type: production
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+      development-dependencies:
+        applies-to: version-updates
+        dependency-type: development
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
