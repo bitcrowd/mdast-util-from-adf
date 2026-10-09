@@ -17,7 +17,7 @@ jobs:
       - name: Install library dependencies
         run: npm ci
       - name: Install playground dependencies
-        run: npm ci
+        run: npm install # NOTE: npm ci does not work here (private Atlassian packages…)
         working-directory: playground
       - name: Lint
         run: npm run lint
