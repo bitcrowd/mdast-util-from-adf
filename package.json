@@ -8,7 +8,10 @@
     "url": "https://bitcrowd.net",
     "email": "info@bitcrowd.net"
   },
-  "repository": "github:bitcrowd/mdast-util-from-adf",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitcrowd/mdast-util-from-adf.git"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "exports": "./dist/index.js",
