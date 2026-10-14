@@ -15,7 +15,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@atlaskit/editor-core": "^232.0.6",
+    "@atlaskit/editor-core": "^234.3.2",
     "clsx": "^2.1.1",
     "mdast-util-gfm": "^3.1.0",
     "mdast-util-to-markdown": "^2.1.3",
