@@ -26,6 +26,7 @@ updates:
       # Parser and plugin must share a major version, so bump them together
       typescript-eslint:
         patterns:
+          - "typescript-eslint"
           - "@typescript-eslint/*"
       production-dependencies:
         applies-to: version-updates
