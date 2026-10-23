@@ -23,10 +23,6 @@ updates:
     schedule:
       interval: "monthly"
     groups:
-      # Parser and plugin must share a major version, so bump them together
-      typescript-eslint:
-        patterns:
-          - "@typescript-eslint/*"
       production-dependencies:
         applies-to: version-updates
         dependency-type: production
@@ -67,10 +63,6 @@ updates:
         patterns:
           - "tailwindcss"
           - "@tailwindcss/*"
-      typescript-eslint:
-        patterns:
-          - "typescript-eslint"
-          - "@typescript-eslint/*"
       production-dependencies:
         applies-to: version-updates
         dependency-type: production
