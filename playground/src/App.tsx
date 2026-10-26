@@ -1,9 +1,9 @@
 import type { DocNode } from "@atlaskit/adf-schema";
+import { fromADF } from "mdast-util-from-adf";
 import { gfmToMarkdown } from "mdast-util-gfm";
 import { toMarkdown } from "mdast-util-to-markdown";
 import { useMemo, useState } from "react";
 
-import { fromADF } from "../..";
 import Code from "./Code";
 import Editor from "./Editor";
 import example from "./example";
